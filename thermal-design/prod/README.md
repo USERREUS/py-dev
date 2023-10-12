@@ -1,5 +1,2 @@
-# thermal-design
-
-	This is my part of a collaborative project to create a thermal simulation program. I wrote a thesis on this part. I left an explanatory note to my thesis in Russian language.
-
-	All engineering calculations are proprietary to the TPP engineers and are not provided in the memo. Instead, the calculation formulas are replaced by stubs.
+- (RU) Это моя часть совместного проекта по созданию программы теплового моделирования. По этой части я написал дипломную работу. К диссертации я оставил пояснительную записку на русском языке. Все инженерные расчеты являются собственностью инженеров ТЭС и в пояснительной записке не приводятся. Вместо этого расчетные формулы заменены заглушками.
+- (EN) This is my part of a collaborative project to create a thermal simulation program. I wrote a thesis on this part. I left an explanatory note to my thesis in Russian language. All engineering calculations are proprietary to the TPP engineers and are not provided in the memo. Instead, the calculation formulas are replaced by stubs.
