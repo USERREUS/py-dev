@@ -1,0 +1,1148 @@
+"""
+________________________________________________________________________________________________________________________
+MODULE NAME
+________________________________________________________________________________________________________________________
+"""
+import datetime
+import json
+import sys
+
+from PySide6 import QtGui, QtCore
+from PySide6.QtCore import QPoint, QMimeData
+from PySide6.QtGui import QFont, QPainter, QPen, Qt, QBrush, QDrag, QPalette, QColor
+from PySide6.QtWidgets import QWidget, QPushButton, QCheckBox, QLabel, QLineEdit, QGridLayout, QHBoxLayout, QVBoxLayout, \
+    QMessageBox, QMainWindow, QMenuBar, QMenu, QApplication, QFileDialog
+
+import DB
+from calc_table import Example
+from functions import do_func_by_name
+
+"""
+________________________________________________________________________________________________________________________
+ENCLOSED_DIALOG
+________________________________________________________________________________________________________________________
+"""
+
+# Диалоговое окно с общими методами и полями
+class EnclosedDialog(QWidget):
+
+    def __init__(self):
+        super(EnclosedDialog, self).__init__()
+
+        self.confirm_button = QPushButton("Confirm")
+        self.close_button = QPushButton("Close")
+        self.delete_button = QPushButton("Delete")
+        self.destroy_connect_button = QPushButton("Destroy conn")
+        self.block_info_button = QPushButton("Info") ###
+
+        self.value_sending_flag = QCheckBox('Разрешить передачу')
+
+        self.change_title_label = QLabel("Enter new title:")
+        self.change_title_edit = QLineEdit("NONE")
+        self.change_title_button = QPushButton("Change")
+
+        self.setWindowTitle("Enclosed window")
+
+
+# Тестовое диалоговое окно для скалярных функций
+class TESTDialog(EnclosedDialog):
+
+    def __init__(self):
+        super(TESTDialog, self).__init__()
+
+        self.variable_text_label = QLabel("Variable:")
+        self.function_text_label = QLabel("Function:")
+        self.result_text_label = QLabel("Result:")
+
+        self.variable_text_edit = QLineEdit("NONE")
+
+        self.function_text_edit = QLineEdit("NONE")
+        self.function_text_edit.setReadOnly(True)
+
+        self.result_text_edit = QLineEdit("NONE")
+        self.result_text_edit.setReadOnly(True)
+
+        self.grid_layout = QGridLayout()
+        self.grid_layout.setSpacing(10)
+
+        self.setWindowTitle("Test window")
+
+        self.grid_layout.addWidget(self.change_title_label, 1, 0)
+        self.grid_layout.addWidget(self.change_title_edit, 1, 1)
+        # self.grid_layout.addWidget(self.change_title_button, 1, 2)
+
+        self.grid_layout.addWidget(self.variable_text_label, 2, 0)
+        self.grid_layout.addWidget(self.variable_text_edit, 2, 1)
+
+        self.grid_layout.addWidget(self.function_text_label, 3, 0)
+        self.grid_layout.addWidget(self.function_text_edit, 3, 1)
+
+        self.grid_layout.addWidget(self.result_text_label, 4, 0)
+        self.grid_layout.addWidget(self.result_text_edit, 4, 1)
+
+        self.grid_layout.addWidget(self.value_sending_flag, 5, 0)
+
+        # self.grid_layout.addWidget(self.destroy_connect_button, 2, 2)
+        # self.grid_layout.addWidget(self.confirm_button, 3, 2)
+        # self.grid_layout.addWidget(self.close_button, 4, 2)
+        # self.grid_layout.addWidget(self.delete_button, 5, 2)
+
+        # okButton = QPushButton("OK")
+        # cancelButton = QPushButton("Cancel")
+
+        hbox = QHBoxLayout()
+        # hbox.addStretch(1)
+        hbox.addWidget(self.destroy_connect_button)
+        hbox.addWidget(self.change_title_button)
+        hbox.addWidget(self.delete_button)
+        hbox.addWidget(self.block_info_button) ###
+        hbox.addSpacing(50)
+        hbox.addWidget(self.confirm_button)
+        hbox.addWidget(self.close_button)
+
+        vbox = QVBoxLayout()
+        vbox.addLayout(self.grid_layout)
+        vbox.addSpacing(50)
+        vbox.addLayout(hbox)
+
+        self.setLayout(vbox)
+        # self.setLayout(self.grid_layout)
+
+
+# диалоговое окно для конкретной функции LPHD
+class LPHDialog(EnclosedDialog):
+
+    def __init__(self):
+        super(LPHDialog, self).__init__()
+
+        grid_layout = QGridLayout()
+        grid_layout.setSpacing(10)
+
+        """
+            P_п = float(input('Введите давление греющего пара, МПа: '))
+            t_п = float(input('Введите температуру греющего пара, °С: '))
+            t_н = float(input('Введите температуру насыщения в подогревателе, °С: '))
+            p_к = float(input('Введите давление нагреваемого конденсата, МПа: '))
+            t_вх = float(input('Введите температуру конденсата на входе в подогреватель, °С: '))
+            G_к = float(input('Введите расход конденсата через подогреватель, кг/с: '))
+            etta_п = float(input('Введите коэффициент полезного действия подогреватель (КПД), в долях: '))
+        """
+
+        comment_in_label = QLabel("Входные данные:")
+        comment_in_label.setFont(QFont("Times", 12, QFont.Bold))
+        comment_out_label = QLabel("Выходные данные:")
+        comment_out_label.setFont(QFont("Times", 12, QFont.Bold))
+
+        P_p_label = QLabel("   Давление греющего пара, МПа: ")
+        t_p_label = QLabel("   Температура греющего пара, °С: ")
+        t_n_label = QLabel("   Температура насыщения в подогревателе, °С: ")
+        p_k_label = QLabel("   Давление нагреваемого конденсата, МПа: ")
+        t_vx_label = QLabel("  Температура конденсата на входе в подогреватель, °С: ")
+        G_k_label = QLabel("   Расход конденсата через подогреватель, кг/с: ")
+        etta_p_label = QLabel("    Коэффициент полезного действия подогреватель (КПД), в долях: ")
+
+        """
+            print(f'\nВыходные данные программы:\n\nРасход пара на подогреватель: {D_п} кг/с\n'
+              f'Число параллеьных труб по ходу воды: {z_1}\n'
+              f'Коэффициент теплоотдачи: {k} Вт/(м^2*K)')
+        """
+
+        D_p_label = QLabel("   Расход пара на подогреватель, кг/с:")
+        z_1_label = QLabel("   Число параллеьных труб по ходу воды:")
+        k_label = QLabel("   Коэффициент теплоотдачи, Вт/(м^2*K):")
+
+        self.P_p_line_edit = QLineEdit("10")
+        self.t_p_line_edit = QLineEdit("300")
+        self.t_n_line_edit = QLineEdit("120")
+        self.p_k_line_edit = QLineEdit("5")
+        self.t_vx_line_edit = QLineEdit("20")
+        self.G_k_line_edit = QLineEdit("280")
+        self.etta_p_line_edit = QLineEdit("0.95")
+
+        self.D_p_line_edit = QLineEdit()
+        self.z_1_line_edit = QLineEdit()
+        self.k_line_edit = QLineEdit()
+
+        self.D_p_line_edit.setReadOnly(True)
+        self.z_1_line_edit.setReadOnly(True)
+        self.k_line_edit.setReadOnly(True)
+
+        self.setWindowTitle("LPH window")
+
+        grid_layout.addWidget(self.change_title_label, 1, 0)
+        grid_layout.addWidget(self.change_title_edit, 1, 1)
+        grid_layout.addWidget(self.change_title_button, 1, 2)
+
+        grid_layout.addWidget(comment_in_label, 2, 0)
+
+        grid_layout.addWidget(P_p_label, 3, 0)
+        grid_layout.addWidget(t_p_label, 4, 0)
+        grid_layout.addWidget(t_n_label, 5, 0)
+        grid_layout.addWidget(p_k_label, 6, 0)
+        grid_layout.addWidget(t_vx_label, 7, 0)
+        grid_layout.addWidget(G_k_label, 8, 0)
+        grid_layout.addWidget(etta_p_label, 9, 0)
+
+        grid_layout.addWidget(self.P_p_line_edit, 3, 1)
+        grid_layout.addWidget(self.t_p_line_edit, 4, 1)
+        grid_layout.addWidget(self.t_n_line_edit, 5, 1)
+        grid_layout.addWidget(self.p_k_line_edit, 6, 1)
+        grid_layout.addWidget(self.t_vx_line_edit, 7, 1)
+        grid_layout.addWidget(self.G_k_line_edit, 8, 1)
+        grid_layout.addWidget(self.etta_p_line_edit, 9, 1)
+
+        grid_layout.addWidget(comment_out_label, 10, 0)
+
+        grid_layout.addWidget(D_p_label, 11, 0)
+        grid_layout.addWidget(z_1_label, 12, 0)
+        grid_layout.addWidget(k_label, 13, 0)
+
+        grid_layout.addWidget(self.D_p_line_edit, 11, 1)
+        grid_layout.addWidget(self.z_1_line_edit, 12, 1)
+        grid_layout.addWidget(self.k_line_edit, 13, 1)
+
+        # grid_layout.addWidget(self.value_sending_flag, 14, 0)
+
+        grid_layout.addWidget(self.destroy_connect_button, 2, 2)
+        grid_layout.addWidget(self.confirm_button, 11, 2)
+        grid_layout.addWidget(self.close_button, 12, 2)
+        grid_layout.addWidget(self.delete_button, 13, 2)
+
+        self.setLayout(grid_layout)
+
+
+# диалоговое окно для конкретной функции LPHD
+class CondDialog(EnclosedDialog):
+
+    def __init__(self):
+        super(CondDialog, self).__init__()
+
+        grid_layout = QGridLayout()
+        grid_layout.setSpacing(10)
+
+        """
+            Gп = 319.6 #ВХОДНЫЕ ДАННЫЕ
+            Gв = 15700 #ВХОДНЫЕ ДАННЫЕ
+            t1в = 15 + 273.15 #ВХОДНЫЕ ДАННЫЕ
+            dн = 28 #ВХОДНЫЕ ДАННЫЕ
+            dвн = 26 #ВХОДНЫЕ ДАННЫЕ
+            z = 2 #ВХОДНЫЕ ДАННЫЕ
+            W = 2.1 #ВХОДНЫЕ ДАННЫЕ
+            F = 36138 #ВХОДНЫЕ ДАННЫЕ
+            N = 24296 #ВХОДНЫЕ ДАННЫЕ
+        """
+
+        comment_in_label = QLabel("Входные данные:")
+        comment_in_label.setFont(QFont("Times", 12, QFont.Bold))
+        comment_out_label = QLabel("Выходные данные:")
+        comment_out_label.setFont(QFont("Times", 12, QFont.Bold))
+
+        Gп_label = QLabel(" Расход пара в конденсатор, кг/с: ")
+        Gв_label = QLabel(" Расход охлаждающей воды, кг/с: ")
+        t1в_label = QLabel(" Температуру воды на входе в конденсатор, К: ")
+        dн_label = QLabel(" Наружный диаметр трубок, мм: ")
+        dвн_vx_label = QLabel(" Внутренний диаметр трубок, мм: ")
+        z_label = QLabel(" Число ходов воды: ")
+        W_label = QLabel(" Скорость воды в трубках, м/c: ")
+        F_label = QLabel(" Площадь поверхности теплообмена, м2: ")
+        N_label = QLabel(" Количество трубок, шт.: ")
+
+        """
+            print(f'\nВыходные данные программы: \n\nТемпература воды на выходе из кондесатора: {t2в - 273.15:1.3f}°C\n'
+          f'Значение температуры насыщения в конденсаторе: {(tk - 273.15):1.3f}°C\n'
+          f'Давление насыщения в конденсаторе: {wsp.PST(tk) * 10 ** 3:1.3f}КПа')
+        """
+
+        out1_label = QLabel("Температура воды на выходе из кондесатора, °C: ")
+        out2_label = QLabel("Значение температуры насыщения в конденсаторе, °C: ")
+        out3_label = QLabel("Давление насыщения в конденсаторе, КПа: ")
+
+        self.Gп_line_edit = QLineEdit("319.6")
+        self.Gв_line_edit = QLineEdit("15700")
+        t1в = 15 + 273.15
+        self.t1в_line_edit = QLineEdit(f"{t1в}")
+        self.dн_line_edit = QLineEdit("28")
+        self.dвн_line_edit = QLineEdit("26")
+        self.z_line_edit = QLineEdit("2")
+        self.W_line_edit = QLineEdit("2.1")
+        self.F_line_edit = QLineEdit("36138")
+        self.N_line_edit = QLineEdit("24296")
+
+        self.out1_line_edit = QLineEdit()
+        self.out2_line_edit = QLineEdit()
+        self.out3_line_edit = QLineEdit()
+
+        self.out1_line_edit.setReadOnly(True)
+        self.out2_line_edit.setReadOnly(True)
+        self.out3_line_edit.setReadOnly(True)
+
+        self.setWindowTitle("Cond window")
+
+        grid_layout.addWidget(self.change_title_label, 1, 0)
+        grid_layout.addWidget(self.change_title_edit, 1, 1)
+        grid_layout.addWidget(self.change_title_button, 1, 2)
+
+        grid_layout.addWidget(comment_in_label, 2, 0)
+
+        grid_layout.addWidget(Gп_label, 3, 0)
+        grid_layout.addWidget(Gв_label, 4, 0)
+        grid_layout.addWidget(t1в_label, 5, 0)
+        grid_layout.addWidget(dн_label, 6, 0)
+        grid_layout.addWidget(dвн_vx_label, 7, 0)
+        grid_layout.addWidget(z_label, 8, 0)
+        grid_layout.addWidget(W_label, 9, 0)
+        grid_layout.addWidget(F_label, 10, 0)
+        grid_layout.addWidget(N_label, 11, 0)
+
+        grid_layout.addWidget(self.Gп_line_edit, 3, 1)
+        grid_layout.addWidget(self.Gв_line_edit, 4, 1)
+        grid_layout.addWidget(self.t1в_line_edit, 5, 1)
+        grid_layout.addWidget(self.dн_line_edit, 6, 1)
+        grid_layout.addWidget(self.dвн_line_edit, 7, 1)
+        grid_layout.addWidget(self.z_line_edit, 8, 1)
+        grid_layout.addWidget(self.W_line_edit, 9, 1)
+        grid_layout.addWidget(self.F_line_edit, 10, 1)
+        grid_layout.addWidget(self.N_line_edit, 11, 1)
+
+        grid_layout.addWidget(comment_out_label, 12, 0)
+
+        grid_layout.addWidget(out1_label, 13, 0)
+        grid_layout.addWidget(out2_label, 14, 0)
+        grid_layout.addWidget(out3_label, 15, 0)
+
+        grid_layout.addWidget(self.out1_line_edit, 13, 1)
+        grid_layout.addWidget(self.out2_line_edit, 14, 1)
+        grid_layout.addWidget(self.out3_line_edit, 15, 1)
+
+        # grid_layout.addWidget(self.value_sending_flag, 16, 0)
+
+        grid_layout.addWidget(self.destroy_connect_button, 2, 2)
+        grid_layout.addWidget(self.confirm_button, 13, 2)
+        grid_layout.addWidget(self.close_button, 14, 2)
+        grid_layout.addWidget(self.delete_button, 15, 2)
+
+        self.setLayout(grid_layout)
+
+"""
+________________________________________________________________________________________________________________________
+MOVING_AREA
+________________________________________________________________________________________________________________________
+"""
+
+# Окно для размещения и перетаксивания объектов
+class MovingArea(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.setAcceptDrops(True)
+        self.buttons = []  # массив всех кнопок на рабочей области
+        self.pair_buttons = []
+        self.logic_connected_pair = []  # FIX
+
+    # Событие по захвату объекта - пока ничего не делает
+    def dragEnterEvent(self, event):
+        event.accept()
+
+    # Событие по отпусканию кнопки после переноса - изменяет координаты центра объекта
+    def dropEvent(self, event):
+        for button in self.buttons:
+            if button.isDown():
+                move_x = event.position().x() - button.width() / 2
+                move_y = event.position().y() - button.height() / 2
+
+                if event.position().x() + button.width() / 2 > self.width():
+                    move_x = self.width() - 2 * button.width() / 2
+
+                if event.position().y() + button.height() / 2 > self.height():
+                    move_y = self.height() - 2 * button.height() / 2
+
+                if event.position().x() - button.width() / 2 < 0:
+                    move_x = 0
+
+                if event.position().y() - button.height() / 2 < 0:
+                    move_y = 0
+
+                button.move(move_x, move_y)
+
+                button.set_coords(int(move_x), int(move_y))
+                qwe = button.get_coords()
+                print(f'Button position after moving: {qwe[0]}, {qwe[1]}')
+
+        self.printing()
+        event.accept()
+
+    # Событие рисования связей
+    def paintEvent(self, event):
+        if len(self.logic_connected_pair) != 0:
+            for pair in self.logic_connected_pair:
+                if pair.is_correct():
+                    qp = QPainter()
+                    qp.begin(self)
+                    pt_from = QPoint(pair.line_start_x, pair.line_start_y)
+
+                    x, y = pair.get_point_coordinates()
+                    pr_to = QPoint(x, y)
+
+                    draw_lines(qp, pt_from, pr_to)
+
+                    point_x, point_y = pair.get_point_coordinates()
+
+                    qp.setPen(QPen(Qt.black, 1, Qt.SolidLine))
+
+                    if pair.btnl.enclosed_dialog.value_sending_flag.isChecked():
+                        qp.setBrush(QBrush(Qt.green, Qt.SolidPattern))
+
+                    else:
+                        qp.setBrush(QBrush(Qt.blue, Qt.SolidPattern))
+
+                    qp.drawEllipse(int(point_x) - 5, int(point_y) - 5, 10, 10)
+                    qp.end()
+
+    # Метод рисования с пересчетом координат
+    def printing(self):
+        if len(self.logic_connected_pair) != 0:
+
+            for pair in self.logic_connected_pair:
+
+                if pair.is_correct():
+
+                    pair.recalculate_coordinates()
+
+        self.update()
+
+    # Метод проверки на наличие кнопки в массиве пар
+    def is_in_logic_cp(self, button):
+        for pair in self.logic_connected_pair:
+            if pair.btnl == button or pair.btnr == button:
+                return True
+
+        return False
+
+    # Метод удаления всех связей с данной кнопкой
+    def destroy_connection(self, button):
+        # print("START Method: destroy_connection_____________________")
+        # FIX !!! переделать цикл (хотя лучше не трогать пока работает)
+        j = 0
+        for i in range(len(self.logic_connected_pair)):
+            if self.logic_connected_pair[i - j].btnl == button or self.logic_connected_pair[i - j].btnr == button:
+                self.logic_connected_pair.remove(self.logic_connected_pair[i - j])
+                j = j + 1
+        # print("END Method: destroy_connection_____________________")
+
+
+# Метод рисования линий
+def draw_lines(qp, pt_form, pt_to):
+    pen = QtGui.QPen(QtCore.Qt.black, 2, QtCore.Qt.SolidLine)
+    pen.setStyle(Qt.DotLine)
+    qp.setPen(pen)
+    qp.drawLine(pt_form.x(), pt_form.y(), pt_to.x(), pt_to.y())
+
+
+# Класс логической пары кнопок
+class ButtonsPair:
+
+    def __init__(self):
+        self.btnl = None
+        self.btnr = None
+
+        self.line_start_x = 0
+        self.line_start_y = 0
+
+        self.line_end_x = 0
+        self.line_end_y = 0
+
+        self.point_x = 0
+        self.point_y = 0
+
+    # Установить левую кнопку в паре
+    def set_btnl(self, btnl):
+        self.btnl = btnl
+
+    # Установить правую кнопку в паре
+    def set_btnr(self, btnr):
+        self.btnr = btnr
+        self.btnr.sender = self.btnl
+
+        self.recalculate_coordinates()
+
+        self.btnr.moving_area.update()
+
+    # Пересчитать координаты
+    def recalculate_coordinates(self):
+        self.line_start_x = self.btnl.x() + self.btnl.width() / 2
+        self.line_start_y = self.btnl.y() + self.btnl.height() / 2
+
+        self.line_end_x = self.btnr.x() + self.btnr.width() / 2
+        self.line_end_y = self.btnr.y() + self.btnr.height() / 2
+
+    # Получить координаты точки
+    def get_point_coordinates(self):
+        center_btnl_x = self.line_start_x
+        center_btnl_y = self.line_start_y
+
+        center_btnr_x = self.line_end_x
+        center_btnr_y = self.line_end_y
+
+        if center_btnl_y > center_btnr_y + self.btnl.height() / 2:
+            return center_btnr_x, center_btnr_y + (self.btnl.height() / 2) + 5
+
+        elif center_btnl_y < center_btnr_y - self.btnl.height() / 2 - 5:
+            return center_btnr_x, center_btnr_y - (self.btnl.height() / 2) - 5
+
+        elif center_btnl_x < center_btnr_x:
+            return center_btnr_x - (self.btnr.width() / 2) - 5, center_btnr_y
+
+        else:
+            return center_btnr_x + (self.btnr.width() / 2) + 5, center_btnr_y
+
+    # Проверка на коррекность пары
+    def is_correct(self):
+        return not (self.btnl is None or self.btnr is None)
+"""
+________________________________________________________________________________________________________________________
+DB
+________________________________________________________________________________________________________________________
+"""
+"""
+________________________________________________________________________________________________________________________
+BUTTONS
+________________________________________________________________________________________________________________________
+"""
+"""
+Тут описывается все, что касается внутренностей кнопок
+"""
+
+
+# Класс абстрактной кнопки
+class AbsMovingButton(QPushButton):
+    # saving
+    pos_x = 0
+    pos_y = 0
+    button_name = 'free'
+    send_flag = False
+    send_to = 'None'
+
+    # ______
+
+    def __init__(self, parent, encl_dialog):
+        super().__init__(parent)
+
+        self.moving_area = parent
+        self.enclosed_dialog = encl_dialog()
+        self.info = Example()  ###
+        self.expr_string = None
+        self.function = None
+        self.value = None
+        self.number = None
+
+        self.clicked.connect(self.open_dialog)
+
+        self.enclosed_dialog.destroy_connect_button.clicked.connect(self.destroy_connection)
+        self.enclosed_dialog.change_title_button.clicked.connect(self.change_title)
+        self.enclosed_dialog.close_button.clicked.connect(self.return_to_main)
+        self.enclosed_dialog.confirm_button.clicked.connect(self.add_value)
+        self.enclosed_dialog.delete_button.clicked.connect(self.del_object)
+        self.enclosed_dialog.block_info_button.clicked.connect(self.show_info)
+
+    def show_info(self):  ###
+        text = DB.get_data()
+        self.info.text.clear()
+        for line in text:
+            if line["block_name"] == self.text():
+                self.info.text.append(str(line) + '\n')
+        self.info.show()
+
+    # Разорвать соединение с этой кнопкой
+    def destroy_connection(self):
+        self.moving_area.destroy_connection(self)
+        self.enclosed_dialog.close()
+
+    # Изменить заголовок кнопки
+    def change_title(self):
+        title = self.enclosed_dialog.change_title_edit.text()
+        self.enclosed_dialog.setWindowTitle(title)
+        self.setText(title)
+
+        self.set_button_name(self.enclosed_dialog.windowTitle())
+
+    # Открывает вложенное диалоговое окно для ввода или просмотра значения
+    def open_dialog(self):
+        self.enclosed_dialog.show()
+
+    # Возврат в основное окно
+    def return_to_main(self):
+        self.enclosed_dialog.close()
+
+    # Установка значения с закрытием окна
+    def add_value(self):
+        self.enclosed_dialog.close()
+
+    # Удаление кнопки с разрушением связей
+    def del_object(self):
+        # FIX !!! переделать цикл (хотя лучше не трогать пока работает)
+        j = 0
+        for i in range(len(self.moving_area.logic_connected_pair)):
+            if self.moving_area.logic_connected_pair[i - j].btnl == self or \
+                    self.moving_area.logic_connected_pair[i - j].btnr == self:
+                self.moving_area.logic_connected_pair.remove(self.moving_area.logic_connected_pair[i - j])
+                j = j + 1
+
+        self.deleteLater()
+        self.enclosed_dialog.close()
+
+        if self in self.moving_area.buttons:
+            self.moving_area.buttons.remove(self)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.LeftButton:
+            mime_data = QMimeData()
+            drag = QDrag(self)
+            drag.setMimeData(mime_data)
+            drag.exec(Qt.MoveAction)
+
+    def mousePressEvent(self, event):
+        if event.buttons() == Qt.RightButton:
+            if len(self.moving_area.logic_connected_pair) != 0:
+                for pair in self.moving_area.logic_connected_pair:
+                    if pair.btnl == self and pair.btnr is None:
+                        return
+
+                for pair in self.moving_area.logic_connected_pair:
+                    if pair.btnl != self and pair.btnr is None:
+                        for pair_in in self.moving_area.logic_connected_pair:
+                            if pair_in.btnl == self:
+                                return
+
+                        pair.set_btnr(self)
+                        return
+
+            if len(self.moving_area.buttons) > len(self.moving_area.logic_connected_pair) + 1:
+                pair = ButtonsPair()
+                pair.set_btnl(self)
+                self.moving_area.logic_connected_pair.append(pair)
+
+        return QPushButton.mousePressEvent(self, event)
+
+    def evaluate(self) -> 'calculation result (maybe double, int, float, ect.)':
+        pass
+
+    def expression_to_string(self) -> str:
+        pass
+
+    # ----------------------------------
+
+    def set_coords(self, x, y):
+        self.pos_x = x
+        self.pos_y = y
+
+    def get_coords(self):
+        return self.pos_x, self.pos_y  # SELF
+
+    # ----------------------------------
+
+    def set_button_name(self, name: str):
+        self.button_name = name
+
+    def get_button_name(self):
+        return self.button_name
+
+    # ----------------------------------
+
+    def set_send_flag(self, tf: bool):
+        self.send_flag = tf
+
+    def get_send_flag(self):
+        return self.send_flag
+
+    # ----------------------------------
+
+    def set_send_to(self, recipient: str):
+        self.send_to = recipient
+
+    def get_send_to(self):
+        return self.send_to
+
+
+# Класс кнопки возведения в квадрат
+class SquareXFunction(AbsMovingButton):
+    static_num = 0
+
+    def __init__(self, parent):
+        super().__init__(parent, TESTDialog)
+        self.resize(80, 80)
+        self.setFont(QFont("Times", 16, QFont.Bold))
+        self.function = "square"
+        self.enclosed_dialog.function_text_edit.setText(self.function)
+        self.setText("X^2")
+
+        # Генерация номера объекта
+        self.number = SquareXFunction.static_num
+        if self.number != 0:
+            self.setText(self.text() + f"_{self.number}")
+        SquareXFunction.static_num += 1
+
+    def add_value(self):  # РАЗРЕШИТЬ МЕНЯТЬ ФЛАГ БЕЗ ИЗМЕНЕНИЯ ЗНАЧЕНИЯ
+
+        # print(f"START method: add value of {self.text()}_____________________")
+        try:
+            self.value = [float(self.enclosed_dialog.variable_text_edit.text())]
+            self.enclosed_dialog.close()
+
+        except Exception:
+            msg = QMessageBox()
+            msg.setWindowTitle("Ошибка записи данных!")
+            msg.setText("Введенные данные не могут быть интерпретированы")
+            msg.setIcon(QMessageBox.Warning)
+
+            msg.exec()
+
+        # finally:
+        # print(f"END method: add value of {self.text()}_____________________")
+
+    def evaluate(self) -> 'calculation result (maybe list, double, int, float, ect.)':
+        result = do_func_by_name(self.function, self.value)
+        self.enclosed_dialog.result_text_edit.setText(f"{result[0]:.{4}f}")
+
+        calc_dt = datetime.datetime.now().isoformat()
+        DB.add_value(self.text(), self.function, calc_dt, self.value[0], result[0])
+
+        return result
+
+    def expression_to_string(self) -> str:
+        self.enclosed_dialog.variable_text_edit.setText(f"{self.value[0]}")
+        self.expr_string = self.function + f"({self.value})"
+
+        return self.expr_string
+
+
+# класс конкретной кнопки для функции LPH
+class LPHButton(AbsMovingButton):
+    static_num = 0
+
+    def __init__(self, parent):
+        super().__init__(parent, LPHDialog)
+
+        self.resize(80, 80)
+        self.setFont(QFont("Times", 16, QFont.Bold))
+        self.function = "LPH"
+        self.setText("LPH")
+
+        # Генерация номера объекта
+        self.number = LPHButton.static_num
+        if self.number != 0:
+            self.setText(self.text() + f"_{self.number}")
+        LPHButton.static_num += 1
+
+    def add_value(self):
+        values = [
+            float(self.enclosed_dialog.P_p_line_edit.text()),
+            float(self.enclosed_dialog.t_p_line_edit.text()),
+            float(self.enclosed_dialog.t_n_line_edit.text()),
+            float(self.enclosed_dialog.p_k_line_edit.text()),
+            float(self.enclosed_dialog.t_vx_line_edit.text()),
+            float(self.enclosed_dialog.G_k_line_edit.text()),
+            float(self.enclosed_dialog.etta_p_line_edit.text())
+        ]
+
+        self.value = values
+        self.enclosed_dialog.close()
+
+    def evaluate(self) -> 'calculation result (maybe list, double, int, float, ect.)':
+        result = do_func_by_name(self.function, self.value)
+
+        self.enclosed_dialog.D_p_line_edit.setText(f"{result[0]:.{6}f}")
+        self.enclosed_dialog.z_1_line_edit.setText(f"{result[1]}")
+        self.enclosed_dialog.k_line_edit.setText(f"{result[2]:.{6}f}")
+
+        return result
+
+    def expression_to_string(self) -> str:
+        self.expr_string = self.function
+
+        return self.expr_string
+
+
+# Класс кнопки с функцией конденсатора
+class CondButton(AbsMovingButton):
+    static_num = 0
+
+    def __init__(self, parent):
+        super().__init__(parent, CondDialog)
+
+        self.resize(80, 80)
+        self.setFont(QFont("Times", 16, QFont.Bold))
+        self.function = "Cond"
+        self.setText("Cond")
+
+        # Генерация номера объекта
+        self.number = CondButton.static_num
+        if self.number != 0:
+            self.setText(self.text() + f"_{self.number}")
+        CondButton.static_num += 1
+
+    def add_value(self):
+        values = [
+            float(self.enclosed_dialog.Gп_line_edit.text()),
+            float(self.enclosed_dialog.Gв_line_edit.text()),
+            float(self.enclosed_dialog.t1в_line_edit.text()),
+            float(self.enclosed_dialog.dн_line_edit.text()),
+            float(self.enclosed_dialog.dвн_line_edit.text()),
+            float(self.enclosed_dialog.z_line_edit.text()),
+            float(self.enclosed_dialog.W_line_edit.text()),
+            float(self.enclosed_dialog.F_line_edit.text()),
+            float(self.enclosed_dialog.N_line_edit.text())
+        ]
+
+        self.value = values
+        self.enclosed_dialog.close()
+
+    def evaluate(self) -> 'calculation result (maybe list, double, int, float, ect.)':
+        result = do_func_by_name(self.function, self.value)
+
+        self.enclosed_dialog.out1_line_edit.setText(f"{result[0]:1.{3}f}")
+        self.enclosed_dialog.out2_line_edit.setText(f"{result[1]:1.{3}f}")
+        self.enclosed_dialog.out3_line_edit.setText(f"{result[2]:1.{3}f}")
+
+        return result
+
+    def expression_to_string(self) -> str:
+        self.expr_string = self.function
+
+        return self.expr_string
+
+
+# Функция разделения строки на элементы по _,
+def value_spliter(value: str):
+    split_values = value.split(", ")
+    return split_values
+
+
+"""
+________________________________________________________________________________________________________________________
+EXAMPLE
+________________________________________________________________________________________________________________________
+"""
+"""
+Пока что не структуризированный код
+"""
+
+selected_file = ''  # текущий файл
+
+
+def set_selected_file(file_name: str):
+    global selected_file
+    selected_file = file_name
+
+
+def get_selected_file():
+    global selected_file
+    return selected_file
+
+
+# Метод добавления объектов на область движения
+def action_add_function(moving_area: MovingArea, button_function):
+    moving_area.buttons.append(button_function)
+    button_function.show()
+
+
+# Метод добавления функции возведения в квадрат
+def action_func_square(moving_area: MovingArea):
+    func_square_button = SquareXFunction(moving_area)
+    func_square_button.enclosed_dialog.setWindowTitle(func_square_button.text())
+    func_square_button.set_button_name(func_square_button.enclosed_dialog.windowTitle())
+    action_add_function(moving_area, func_square_button)
+
+
+# Метод доббавления функции LPH
+def action_func_lph(moving_area: MovingArea):
+    func_lph_button = LPHButton(moving_area)
+    action_add_function(moving_area, func_lph_button)
+
+
+# Метод доббавления функции Cond
+def action_func_cond(moving_area: MovingArea):
+    func_cond_button = CondButton(moving_area)
+    action_add_function(moving_area, func_cond_button)
+
+
+# Окно, которое включает в себя область движения
+class MovingController(QMainWindow):
+
+    def __init__(self):
+        super(MovingController, self).__init__()
+
+        self.setFixedSize(700, 700)
+        self.setWindowTitle('Example')
+
+        pal = self.palette()
+        pal.setColor(QPalette.All, QPalette.Window, QColor(167, 198, 201))
+        self.setPalette(pal)
+
+        self.moving_area = MovingArea()
+        self.setCentralWidget(self.moving_area)
+
+        self.menu_bar = QMenuBar()
+        self.create_menu_bar()
+
+    # Метод создания главного меню
+    def create_menu_bar(self):
+        self.setMenuBar(self.menu_bar)
+
+        functions_menu = QMenu("&Functions", self)
+        self.menu_bar.addMenu(functions_menu)
+        self.menu_bar.addAction("&Run", run)
+        self.menu_bar.addAction("&Clear", clear_action_clicked)
+
+        functions_menu.addAction("&x^2", self.action_clicked)
+        functions_menu.addAction("&LPH", self.action_clicked)
+        functions_menu.addAction("&Cond", self.action_clicked)
+
+        self.menu_bar.addAction("&Save", save)  #
+        self.menu_bar.addAction("&Save as...", save_as)  #
+
+        self.menu_bar.addAction("&Load", load)  #
+
+    # Обработчик события выбора пункта меню (конкретно вызываемой функции)
+    @QtCore.Slot()
+    def action_clicked(self):
+        action = self.sender()
+
+        if action.text() == "&x^2":
+            print("Action : " + action.text())
+            action_func_square(moving_controller.moving_area)
+
+        elif action.text() == "&LPH":
+            print("Action : " + action.text())
+            action_func_lph(moving_controller.moving_area)
+
+        elif action.text() == "&Cond":
+            print("Action : " + action.text())
+            action_func_cond(moving_controller.moving_area)
+
+
+# Метод очистки рабочей области
+def clear_action_clicked():
+    moving_controller.moving_area.destroy()
+    moving_controller.moving_area = MovingArea()
+    moving_controller.setCentralWidget(moving_controller.moving_area)
+
+
+# Подсчет глубины связей кнопок
+def depth_of_connection():
+    max_depth = 0
+    top = None
+    flag = False
+
+    for pair in moving_controller.moving_area.logic_connected_pair:
+        depth = 0
+        if pair.btnl.enclosed_dialog.value_sending_flag.isChecked():
+            top = pair.btnr
+            flag = True
+            depth += 1
+
+        while flag:
+            flag = False
+            for _pair in moving_controller.moving_area.logic_connected_pair:
+                if _pair.btnl == top and _pair.btnl.enclosed_dialog.value_sending_flag.isChecked():
+                    depth += 1
+                    top = _pair.btnr
+                    flag = True
+
+        if depth > max_depth:
+            max_depth = depth
+
+    return max_depth
+
+
+# Старт вычислений
+def run():
+    print("START method: run() _______________________")  # отладочная информация
+    print("Connecton depth: ", depth_of_connection())
+
+    try:
+        for button in moving_controller.moving_area.buttons:
+            if not moving_controller.moving_area.is_in_logic_cp(button):
+                print("alone button: ", button.text())
+                expr_string = button.expression_to_string()
+                result = button.evaluate()
+
+        list_temp = []  # решение проблемы повторного расчета
+        noc = depth_of_connection()
+        while True:
+            flag = False
+            for pair in moving_controller.moving_area.logic_connected_pair:
+                print("Calc pair", pair.btnl.text(), pair.btnr.text())
+                if pair.btnl.value is not None:
+                    if pair.btnl in list_temp:
+                        list_temp.remove(pair.btnl)
+                    pair.btnl.expression_to_string()
+                    result = pair.btnl.evaluate()
+                    if pair.btnl.enclosed_dialog.value_sending_flag.isChecked():
+                        pair.btnr.value = result
+                        list_temp.append(pair.btnr)
+                else:
+                    flag = True
+            noc -= 1
+            if not flag or noc <= 0:
+                for btn in list_temp:
+                    btn.expression_to_string()
+                    btn.evaluate()
+                break
+
+    except Exception as exc:
+        msg = QMessageBox()
+        msg.setWindowTitle("Ошибка расчета!")
+        msg.setText(exc.__str__())
+        msg.setIcon(QMessageBox.Critical)
+
+        msg.exec()
+
+    finally:
+        print("END method: run() _______________________")
+
+
+def save_as():
+    # file_name = QFileDialog.getOpenFileName(moving_controller.moving_area, 'Save project', '/PyCharm/pythonProject2',
+    #                                   filter='*.json')[0]
+
+    file_name = QFileDialog.getSaveFileName(moving_controller.moving_area, 'Save project', '/PyCharm/pythonProject2',
+                                            filter='*.json')[0]
+    if file_name == '':
+        return 0
+
+    set_selected_file(file_name)
+
+    i = 1
+    with open(file_name, 'w+', encoding='utf-8') as first_try:
+        first_try.write('{\n "data": [\n')
+
+        for button in moving_controller.moving_area.buttons:
+            json.dump({
+                "button": f"{button.get_button_name()}",
+                "position": [
+                    {
+                        "pos_x": f"{button.get_coords()[0]}",
+                        "pos_y": f"{button.get_coords()[1]}"
+                    }
+                ]  # ,
+                # "send_flag": f"{button.get_send_flag()}",
+                # "send_to": f"{button.get_send_to()}"
+            }
+                , first_try, indent=4)
+
+            i += 1
+            if len(moving_controller.moving_area.buttons) >= i:
+                first_try.write(',\n')
+
+            print(f'Имя кнопки: {button.get_button_name()}')
+
+        first_try.write('\n ]\n}')
+
+    first_try.close()
+    moving_controller.setWindowTitle(
+        file_name[((file_name.rfind('/')) + 1):])  # меняем заголовок окна на название нашего файла
+    print('in saving: ', moving_controller.moving_area.buttons)
+    print("Saved us")
+
+
+def save():
+    file_name = get_selected_file()
+
+    if file_name == '':
+        save_as()
+    else:
+        i = 1
+        with open(file_name, 'w+', encoding='utf-8') as first_try:
+            first_try.write('{\n "data": [\n')
+
+            for button in moving_controller.moving_area.buttons:
+                json.dump({
+                    "button": f"{button.get_button_name()}",
+                    "position": [
+                        {
+                            "pos_x": f"{button.get_coords()[0]}",
+                            "pos_y": f"{button.get_coords()[1]}"
+                        }
+                    ]# ,
+                    # "send_flag": f"{button.get_send_flag()}",
+                    # "send_to": f"{button.get_send_to()}"
+                }
+                    , first_try, indent=4)
+
+                i += 1
+                if len(moving_controller.moving_area.buttons) >= i:
+                    first_try.write(',\n')
+
+                print(f'Имя кнопки: {button.get_button_name()}')
+
+            first_try.write('\n ]\n}')
+
+        first_try.close()
+        print('in saving: ', moving_controller.moving_area.buttons)
+        print("Saved")
+
+
+def load():
+    file_name = QFileDialog.getOpenFileName(moving_controller.moving_area, 'Open project', '/PyCharm/pythonProject2',
+                                            filter='*.json')[0]
+
+    with open(file_name, 'r') as read_fie:
+        something = json.load(read_fie)
+
+    # save()
+
+    set_selected_file(file_name)
+
+    clear_action_clicked()
+
+    send_flag = False
+
+    for i in range(len(something['data'])):
+
+        button_text = something['data'][i]['button']
+
+        func_button = SquareXFunction(moving_controller.moving_area)
+        func_button.enclosed_dialog.setWindowTitle(button_text)
+        func_button.setText(button_text)
+        # print(button_text)
+        func_button.set_button_name(func_button.enclosed_dialog.windowTitle())
+
+        action_add_function(moving_controller.moving_area, func_button)
+        print('in loadig: ', moving_controller.moving_area.buttons)
+
+        move_x = int(something['data'][i]['position'][0]['pos_x'])
+        move_y = int(something['data'][i]['position'][0]['pos_y'])
+        moving_controller.moving_area.buttons[i].move(move_x, move_y)
+        func_button.set_coords(move_x, move_y)
+
+    #     str_send_flag = something['data'][i]['send_flag']
+    #     if str_send_flag == 'True':
+    #         send_flag = True
+    #
+    # if send_flag:
+    #     i = 0
+    #     for button in moving_controller.moving_area.buttons:
+    #         str_send_flag = something['data'][i]['send_flag']
+    #         print('type of flag: ', type(str_send_flag), str_send_flag)
+    #         if str_send_flag == 'True':
+    #             button.enclosed_dialog.value_sending_flag.setChecked(True)
+    #             recipient = something['data'][i]['send_to']
+    #             button.enclosed_dialog.value_sending_block.setText(recipient)
+    #
+    #             button.click()
+    #             button.enclosed_dialog.confirm_button.click()
+    #
+    #         i += 1
+
+    read_fie.close()
+    moving_controller.setWindowTitle(
+        file_name[((file_name.rfind('/')) + 1):])  # меняем заголовок окна на название нашего файла
+    print("Load successful")
+
+
+# Запуск программы
+DB.create_table()
+app = QApplication(sys.argv)
+moving_controller = MovingController()
+moving_controller.show()
+sys.exit(app.exec())
