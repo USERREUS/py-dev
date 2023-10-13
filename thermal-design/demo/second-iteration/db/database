@@ -1,0 +1,1287 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 14.2
+-- Dumped by pg_dump version 14.2
+
+-- Started on 2022-07-19 18:31:00
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 222 (class 1259 OID 35710)
+-- Name: cmp_cond_in; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cmp_cond_in (
+    row_id integer NOT NULL,
+    t2in numeric(20,4) NOT NULL,
+    k numeric(20,4) NOT NULL,
+    tk numeric(20,4) NOT NULL,
+    delta_p numeric(20,4) NOT NULL,
+    ph numeric(20,4) NOT NULL,
+    elect numeric(20,4) NOT NULL,
+    o2 numeric(20,4) NOT NULL,
+    date timestamp(0) without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.cmp_cond_in OWNER TO postgres;
+
+--
+-- TOC entry 3449 (class 0 OID 0)
+-- Dependencies: 222
+-- Name: TABLE cmp_cond_in; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.cmp_cond_in IS 'Таблица для сравнения значений конденсатора';
+
+
+--
+-- TOC entry 224 (class 1259 OID 35739)
+-- Name: cmp_cond_out; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cmp_cond_out (
+    row_id integer NOT NULL,
+    calc_date timestamp(0) without time zone NOT NULL,
+    recording_date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    its numeric(10,4) NOT NULL,
+    technical_condition text NOT NULL,
+    recommended_effect text NOT NULL,
+    state smallint NOT NULL
+);
+
+
+ALTER TABLE public.cmp_cond_out OWNER TO postgres;
+
+--
+-- TOC entry 3450 (class 0 OID 0)
+-- Dependencies: 224
+-- Name: TABLE cmp_cond_out; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.cmp_cond_out IS 'Таблица результата модуля сравнения';
+
+
+--
+-- TOC entry 230 (class 1259 OID 43863)
+-- Name: cmp_lph_in; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cmp_lph_in (
+    row_id integer NOT NULL,
+    date timestamp(1) without time zone DEFAULT now() NOT NULL,
+    steam_pressure numeric(20,4) NOT NULL,
+    outer_diameter numeric(20,4) NOT NULL,
+    condensate_flow_rate numeric(20,4) NOT NULL,
+    internal_diameter numeric(20,4) NOT NULL,
+    condensate_temperature numeric(20,4) NOT NULL,
+    water_passes numeric(20,4) NOT NULL,
+    length_tube numeric(20,4) NOT NULL,
+    number_tubes numeric(20,4) NOT NULL,
+    heating_area numeric(20,4) NOT NULL,
+    heat_conductivity numeric(20,4) NOT NULL
+);
+
+
+ALTER TABLE public.cmp_lph_in OWNER TO postgres;
+
+--
+-- TOC entry 3451 (class 0 OID 0)
+-- Dependencies: 230
+-- Name: TABLE cmp_lph_in; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.cmp_lph_in IS 'Таблица входных данных модуля сравнения подогревателя';
+
+
+--
+-- TOC entry 229 (class 1259 OID 43862)
+-- Name: cmp_lph_in_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cmp_lph_in_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.cmp_lph_in_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3452 (class 0 OID 0)
+-- Dependencies: 229
+-- Name: cmp_lph_in_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cmp_lph_in_row_id_seq OWNED BY public.cmp_lph_in.row_id;
+
+
+--
+-- TOC entry 232 (class 1259 OID 43876)
+-- Name: cmp_lph_out; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cmp_lph_out (
+    row_id integer NOT NULL,
+    calc_date timestamp(1) without time zone NOT NULL,
+    recording_date timestamp(1) without time zone DEFAULT now() NOT NULL,
+    its numeric(10,4) NOT NULL,
+    technical_condition text NOT NULL,
+    recommended_effect text NOT NULL,
+    state smallint NOT NULL
+);
+
+
+ALTER TABLE public.cmp_lph_out OWNER TO postgres;
+
+--
+-- TOC entry 3453 (class 0 OID 0)
+-- Dependencies: 232
+-- Name: TABLE cmp_lph_out; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.cmp_lph_out IS 'Таблица выходных данных модуля сравнения для подогревателя';
+
+
+--
+-- TOC entry 231 (class 1259 OID 43875)
+-- Name: cmp_lph_out_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cmp_lph_out_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.cmp_lph_out_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3454 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: cmp_lph_out_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cmp_lph_out_row_id_seq OWNED BY public.cmp_lph_out.row_id;
+
+
+--
+-- TOC entry 226 (class 1259 OID 43828)
+-- Name: cmp_wsp_in; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cmp_wsp_in (
+    row_id integer NOT NULL,
+    t_out numeric(20,4) NOT NULL,
+    h_out numeric(20,4) NOT NULL,
+    opp numeric(20,4) NOT NULL,
+    oc numeric(20,4) NOT NULL,
+    vib_h numeric(20,4) NOT NULL,
+    vib_v numeric(20,4) NOT NULL,
+    tem_oil numeric(20,4) NOT NULL,
+    date timestamp(0) without time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE public.cmp_wsp_in OWNER TO postgres;
+
+--
+-- TOC entry 3455 (class 0 OID 0)
+-- Dependencies: 226
+-- Name: TABLE cmp_wsp_in; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.cmp_wsp_in IS 'Таблица входных данных модуля сравнения для турбины';
+
+
+--
+-- TOC entry 225 (class 1259 OID 43827)
+-- Name: cmp_wsp_in_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cmp_wsp_in_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.cmp_wsp_in_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3456 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: cmp_wsp_in_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cmp_wsp_in_row_id_seq OWNED BY public.cmp_wsp_in.row_id;
+
+
+--
+-- TOC entry 228 (class 1259 OID 43841)
+-- Name: cmp_wsp_out; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.cmp_wsp_out (
+    row_id integer NOT NULL,
+    calc_date timestamp(0) without time zone NOT NULL,
+    recording_date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    its numeric(10,4) NOT NULL,
+    technical_condition text NOT NULL,
+    recommended_effect text NOT NULL,
+    state smallint NOT NULL
+);
+
+
+ALTER TABLE public.cmp_wsp_out OWNER TO postgres;
+
+--
+-- TOC entry 3457 (class 0 OID 0)
+-- Dependencies: 228
+-- Name: TABLE cmp_wsp_out; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON TABLE public.cmp_wsp_out IS 'Таблица выходных данных модуля сравнения для турбины';
+
+
+--
+-- TOC entry 227 (class 1259 OID 43840)
+-- Name: cmp_wsp_out_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.cmp_wsp_out_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.cmp_wsp_out_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3458 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: cmp_wsp_out_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.cmp_wsp_out_row_id_seq OWNED BY public.cmp_wsp_out.row_id;
+
+
+--
+-- TOC entry 221 (class 1259 OID 35709)
+-- Name: compare_model_cond_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.compare_model_cond_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.compare_model_cond_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3459 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: compare_model_cond_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.compare_model_cond_row_id_seq OWNED BY public.cmp_cond_in.row_id;
+
+
+--
+-- TOC entry 223 (class 1259 OID 35738)
+-- Name: compare_model_out_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.compare_model_out_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.compare_model_out_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3460 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: compare_model_out_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.compare_model_out_row_id_seq OWNED BY public.cmp_cond_out.row_id;
+
+
+--
+-- TOC entry 209 (class 1259 OID 35635)
+-- Name: condenser_in; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.condenser_in (
+    row_id integer NOT NULL,
+    date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    consumption_steam numeric(20,4) NOT NULL,
+    consumption_water numeric(20,4) NOT NULL,
+    temperature_entry numeric(20,4) NOT NULL,
+    diameter_outside numeric(20,4) NOT NULL,
+    diameter_inside numeric(20,4) NOT NULL,
+    number_of_water_strokes integer NOT NULL,
+    water_speed numeric(20,4) NOT NULL,
+    square numeric(20,4) NOT NULL,
+    tube_length numeric(20,4) DEFAULT '-1'::integer NOT NULL,
+    saturation_temperature numeric(20,4) DEFAULT '-1'::integer NOT NULL
+);
+
+
+ALTER TABLE public.condenser_in OWNER TO postgres;
+
+--
+-- TOC entry 210 (class 1259 OID 35638)
+-- Name: condenser_in_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.condenser_in_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.condenser_in_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3461 (class 0 OID 0)
+-- Dependencies: 210
+-- Name: condenser_in_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.condenser_in_row_id_seq OWNED BY public.condenser_in.row_id;
+
+
+--
+-- TOC entry 211 (class 1259 OID 35639)
+-- Name: condenser_out; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.condenser_out (
+    row_id integer NOT NULL,
+    calc_date timestamp(0) without time zone NOT NULL,
+    recording_date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    water_temperature numeric(20,4) NOT NULL,
+    saturation_temperature numeric(20,4) NOT NULL,
+    hydraulic_resistance numeric(20,4) NOT NULL,
+    heat_transfer numeric(20,4) DEFAULT '-1'::integer NOT NULL
+);
+
+
+ALTER TABLE public.condenser_out OWNER TO postgres;
+
+--
+-- TOC entry 212 (class 1259 OID 35643)
+-- Name: condenser_out_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.condenser_out_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.condenser_out_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3462 (class 0 OID 0)
+-- Dependencies: 212
+-- Name: condenser_out_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.condenser_out_row_id_seq OWNED BY public.condenser_out.row_id;
+
+
+--
+-- TOC entry 213 (class 1259 OID 35644)
+-- Name: lph_in; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.lph_in (
+    row_id integer NOT NULL,
+    date timestamp(1) without time zone DEFAULT now() NOT NULL,
+    steam_pressure numeric(20,4) NOT NULL,
+    outer_diameter numeric(20,4) NOT NULL,
+    condensate_flow_rate numeric(20,4) NOT NULL,
+    internal_diameter numeric(20,4) NOT NULL,
+    condensate_temperature numeric(20,4) NOT NULL,
+    water_passes numeric(20,4) NOT NULL,
+    length_tube numeric(20,4) NOT NULL,
+    number_tubes numeric(20,4) NOT NULL,
+    heating_area numeric(20,4) NOT NULL,
+    heat_conductivity numeric(20,4) NOT NULL
+);
+
+
+ALTER TABLE public.lph_in OWNER TO postgres;
+
+--
+-- TOC entry 214 (class 1259 OID 35647)
+-- Name: lph_in_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.lph_in_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.lph_in_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3463 (class 0 OID 0)
+-- Dependencies: 214
+-- Name: lph_in_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.lph_in_row_id_seq OWNED BY public.lph_in.row_id;
+
+
+--
+-- TOC entry 215 (class 1259 OID 35648)
+-- Name: lph_out; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.lph_out (
+    row_id integer NOT NULL,
+    calc_date timestamp(1) without time zone NOT NULL,
+    recording_date timestamp(1) without time zone DEFAULT now() NOT NULL,
+    heat_transfer_coefficient numeric(20,4) NOT NULL,
+    underheating_condensate numeric(20,4) NOT NULL,
+    condensate_outlet_temperature numeric(20,4) NOT NULL
+);
+
+
+ALTER TABLE public.lph_out OWNER TO postgres;
+
+--
+-- TOC entry 216 (class 1259 OID 35652)
+-- Name: lph_out_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.lph_out_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.lph_out_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3464 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: lph_out_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.lph_out_row_id_seq OWNED BY public.lph_out.row_id;
+
+
+--
+-- TOC entry 217 (class 1259 OID 35653)
+-- Name: turbine_in; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.turbine_in (
+    row_id integer NOT NULL,
+    date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    temperature_entry numeric(20,4) NOT NULL,
+    pressure_entry numeric(20,4) NOT NULL,
+    consumption_entry numeric(20,4) NOT NULL,
+    pressure_out numeric(20,4) NOT NULL,
+    efficiency numeric(5,4) NOT NULL,
+    number_of_selections integer NOT NULL,
+    selection_pressure numeric(20,4) NOT NULL,
+    sampling_flow numeric(20,4) NOT NULL
+);
+
+
+ALTER TABLE public.turbine_in OWNER TO postgres;
+
+--
+-- TOC entry 218 (class 1259 OID 35656)
+-- Name: turbine_in_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.turbine_in_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.turbine_in_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3465 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: turbine_in_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.turbine_in_row_id_seq OWNED BY public.turbine_in.row_id;
+
+
+--
+-- TOC entry 219 (class 1259 OID 35657)
+-- Name: turbine_out; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.turbine_out (
+    row_id integer NOT NULL,
+    calc_date timestamp(0) without time zone NOT NULL,
+    recording_date timestamp(0) without time zone DEFAULT now() NOT NULL,
+    enthalpy_before numeric(20,4) NOT NULL,
+    entropy_before numeric(20,4) NOT NULL,
+    enthalpy_after numeric(20,4) NOT NULL,
+    entropy_after numeric(20,4) NOT NULL,
+    steam_temperature numeric(20,4) NOT NULL,
+    enthalpy_1 numeric(20,4),
+    steam_temperature_1 numeric(20,4)
+);
+
+
+ALTER TABLE public.turbine_out OWNER TO postgres;
+
+--
+-- TOC entry 220 (class 1259 OID 35661)
+-- Name: turbine_out_row_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+--
+
+CREATE SEQUENCE public.turbine_out_row_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.turbine_out_row_id_seq OWNER TO postgres;
+
+--
+-- TOC entry 3466 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: turbine_out_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+--
+
+ALTER SEQUENCE public.turbine_out_row_id_seq OWNED BY public.turbine_out.row_id;
+
+
+--
+-- TOC entry 3234 (class 2604 OID 35713)
+-- Name: cmp_cond_in row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_cond_in ALTER COLUMN row_id SET DEFAULT nextval('public.compare_model_cond_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3236 (class 2604 OID 35742)
+-- Name: cmp_cond_out row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_cond_out ALTER COLUMN row_id SET DEFAULT nextval('public.compare_model_out_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3242 (class 2604 OID 43866)
+-- Name: cmp_lph_in row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_lph_in ALTER COLUMN row_id SET DEFAULT nextval('public.cmp_lph_in_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3244 (class 2604 OID 43879)
+-- Name: cmp_lph_out row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_lph_out ALTER COLUMN row_id SET DEFAULT nextval('public.cmp_lph_out_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3238 (class 2604 OID 43831)
+-- Name: cmp_wsp_in row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_wsp_in ALTER COLUMN row_id SET DEFAULT nextval('public.cmp_wsp_in_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3240 (class 2604 OID 43844)
+-- Name: cmp_wsp_out row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_wsp_out ALTER COLUMN row_id SET DEFAULT nextval('public.cmp_wsp_out_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3219 (class 2604 OID 35662)
+-- Name: condenser_in row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.condenser_in ALTER COLUMN row_id SET DEFAULT nextval('public.condenser_in_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3224 (class 2604 OID 35663)
+-- Name: condenser_out row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.condenser_out ALTER COLUMN row_id SET DEFAULT nextval('public.condenser_out_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3226 (class 2604 OID 35664)
+-- Name: lph_in row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lph_in ALTER COLUMN row_id SET DEFAULT nextval('public.lph_in_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3228 (class 2604 OID 35665)
+-- Name: lph_out row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lph_out ALTER COLUMN row_id SET DEFAULT nextval('public.lph_out_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3230 (class 2604 OID 35667)
+-- Name: turbine_in row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.turbine_in ALTER COLUMN row_id SET DEFAULT nextval('public.turbine_in_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3233 (class 2604 OID 35668)
+-- Name: turbine_out row_id; Type: DEFAULT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.turbine_out ALTER COLUMN row_id SET DEFAULT nextval('public.turbine_out_row_id_seq'::regclass);
+
+
+--
+-- TOC entry 3433 (class 0 OID 35710)
+-- Dependencies: 222
+-- Data for Name: cmp_cond_in; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cmp_cond_in (row_id, t2in, k, tk, delta_p, ph, elect, o2, date) FROM stdin;
+260	26.8328	3461.0890	27.8821	88325.9101	3.0793	0.4879	7.8100	2022-07-11 15:03:00
+261	27.7047	3328.5151	29.2625	91000.9711	2.8556	0.5197	8.0470	2022-07-11 15:03:03
+262	27.1870	3534.1091	27.6150	90806.6693	2.8820	0.4930	8.2921	2022-07-11 15:03:06
+263	26.7983	3452.5970	27.2113	93868.3560	3.0440	0.4853	8.0751	2022-07-11 15:03:09
+264	26.7708	3575.2081	27.3128	94363.0557	2.9876	0.5200	8.2910	2022-07-11 19:39:31
+265	26.9220	3327.3189	28.4386	92431.8305	2.9581	0.4801	7.7635	2022-07-11 19:39:32
+266	28.0905	3383.3605	28.6820	90757.3405	3.1416	0.4937	7.8523	2022-07-11 19:39:33
+267	27.8452	3586.4155	27.7906	93809.7833	3.1118	0.5101	7.9926	2022-07-11 19:39:34
+268	27.0385	3534.7267	29.1577	88618.0586	2.8939	0.5165	7.6270	2022-07-11 19:39:34
+269	26.6156	3665.3887	26.8957	93481.0137	3.0297	0.5089	8.3654	2022-07-11 19:39:35
+270	27.4536	3579.9889	28.8243	87332.7822	2.9206	0.5202	8.3389	2022-07-11 19:39:36
+\.
+
+
+--
+-- TOC entry 3435 (class 0 OID 35739)
+-- Dependencies: 224
+-- Data for Name: cmp_cond_out; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cmp_cond_out (row_id, calc_date, recording_date, its, technical_condition, recommended_effect, state) FROM stdin;
+260	2022-07-11 15:23:46	2022-07-11 15:23:46	65.2918	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+261	2022-07-11 15:23:47	2022-07-11 15:23:47	85.4232	очень хорошее	Плановое диагностирование	0
+262	2022-07-11 15:23:47	2022-07-11 15:23:47	75.3860	хорошее	По результатам планового диагностирования	1
+263	2022-07-11 15:23:47	2022-07-11 15:23:47	71.6925	хорошее	По результатам планового диагностирования	1
+264	2022-07-11 19:39:37	2022-07-11 19:39:37	40.0241	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+265	2022-07-11 19:39:37	2022-07-11 19:39:37	87.6553	очень хорошее	Плановое диагностирование	0
+266	2022-07-11 19:39:37	2022-07-11 19:39:37	76.8857	хорошее	По результатам планового диагностирования	1
+267	2022-07-11 19:39:38	2022-07-11 19:39:38	16.2066	критическое	Вывод из эксплуатации, техническое перевооружение и реконструкция	4
+268	2022-07-11 19:39:38	2022-07-11 19:39:38	53.4105	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+269	2022-07-11 19:39:38	2022-07-11 19:39:38	52.8533	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+270	2022-07-11 19:39:39	2022-07-11 19:39:39	69.1292	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+\.
+
+
+--
+-- TOC entry 3441 (class 0 OID 43863)
+-- Dependencies: 230
+-- Data for Name: cmp_lph_in; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cmp_lph_in (row_id, date, steam_pressure, outer_diameter, condensate_flow_rate, internal_diameter, condensate_temperature, water_passes, length_tube, number_tubes, heating_area, heat_conductivity) FROM stdin;
+260	2022-07-11 15:02:59.5	2.0188	2.0248	2.0999	1.9392	2.0868	1.9553	1.9641	2.0600	2.0544	2.0135
+261	2022-07-11 15:03:03.3	1.9843	2.0046	2.0592	2.0121	2.0947	2.0108	1.9184	2.0045	2.0040	1.9776
+262	2022-07-11 15:03:06.3	1.9731	2.0633	1.9455	2.0971	2.0072	2.0502	2.0548	1.9258	2.0441	2.0151
+263	2022-07-11 15:03:09.5	2.0011	1.9032	2.0434	2.0591	1.9988	1.9307	1.9879	1.9899	2.0265	2.0997
+264	2022-07-11 19:39:31.4	2.0693	1.9521	1.9948	2.0508	1.9030	1.9583	2.0508	2.0962	2.0276	2.0929
+265	2022-07-11 19:39:32.2	2.0253	2.0232	2.0663	2.0829	1.9918	1.9965	2.0731	1.9531	1.9733	2.0095
+266	2022-07-11 19:39:32.9	1.9269	2.0591	2.0928	1.9153	2.0070	2.0792	2.0795	2.0726	2.0798	2.0027
+267	2022-07-11 19:39:33.7	2.0747	2.0031	2.0270	2.0849	2.0369	1.9347	2.0804	2.0988	1.9172	1.9216
+268	2022-07-11 19:39:34.3	1.9422	2.0786	1.9056	2.0714	2.0941	2.0125	2.0850	2.0608	1.9206	1.9032
+269	2022-07-11 19:39:35.1	1.9273	2.0971	2.0291	2.0872	1.9124	1.9578	2.0058	2.0585	2.0558	2.0205
+270	2022-07-11 19:39:35.6	2.0942	1.9237	1.9653	1.9924	2.0128	1.9998	2.0707	1.9064	1.9464	2.0410
+\.
+
+
+--
+-- TOC entry 3443 (class 0 OID 43876)
+-- Dependencies: 232
+-- Data for Name: cmp_lph_out; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cmp_lph_out (row_id, calc_date, recording_date, its, technical_condition, recommended_effect, state) FROM stdin;
+260	2022-07-12 21:44:08	2022-07-12 21:44:08	-1.0000	Текст	Текст	2
+261	2022-07-12 21:44:08.2	2022-07-12 21:44:08.2	-1.0000	Текст	Текст	2
+262	2022-07-12 21:44:08.4	2022-07-12 21:44:08.4	-1.0000	Текст	Текст	2
+263	2022-07-12 21:44:08.6	2022-07-12 21:44:08.6	-1.0000	Текст	Текст	2
+264	2022-07-12 21:44:08.8	2022-07-12 21:44:08.8	-1.0000	Текст	Текст	2
+265	2022-07-12 21:44:09	2022-07-12 21:44:09	-1.0000	Текст	Текст	2
+266	2022-07-12 21:44:09.2	2022-07-12 21:44:09.3	-1.0000	Текст	Текст	2
+267	2022-07-12 21:44:09.5	2022-07-12 21:44:09.5	-1.0000	Текст	Текст	2
+268	2022-07-12 21:44:09.7	2022-07-12 21:44:09.7	-1.0000	Текст	Текст	2
+269	2022-07-12 21:44:10	2022-07-12 21:44:10	-1.0000	Текст	Текст	2
+270	2022-07-12 21:44:10.2	2022-07-12 21:44:10.2	-1.0000	Текст	Текст	2
+\.
+
+
+--
+-- TOC entry 3437 (class 0 OID 43828)
+-- Dependencies: 226
+-- Data for Name: cmp_wsp_in; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cmp_wsp_in (row_id, t_out, h_out, opp, oc, vib_h, vib_v, tem_oil, date) FROM stdin;
+260	554.1317	2920.8948	1.9500	2.0192	2.0631	1.9346	51.8421	2022-07-11 15:03:00
+261	533.4560	2922.1753	1.9874	1.9455	1.9701	1.9081	47.5841	2022-07-11 15:03:03
+262	537.1183	2964.8373	2.0607	2.0735	1.9761	2.0110	49.9840	2022-07-11 15:03:06
+263	540.0842	3078.7201	1.9707	1.9207	1.9431	1.9735	51.5723	2022-07-11 15:03:09
+264	559.8329	3110.2729	1.9324	1.9870	2.0360	2.0960	52.2232	2022-07-11 19:39:31
+265	569.6874	2979.1169	2.0160	1.9509	1.9839	1.9116	48.3881	2022-07-11 19:39:32
+266	565.7504	2972.0039	1.9447	1.9758	1.9641	1.9144	48.5370	2022-07-11 19:39:33
+267	578.7402	3141.5518	2.0861	1.9534	2.0573	2.0169	48.8172	2022-07-11 19:39:34
+268	554.8557	3193.5590	1.9700	2.0061	1.9927	1.9772	49.8522	2022-07-11 19:39:34
+269	554.0836	2908.1777	2.0514	2.0506	2.0673	1.9742	50.2466	2022-07-11 19:39:35
+270	553.6142	2916.4096	1.9330	2.0074	2.0692	1.9849	49.7736	2022-07-11 19:39:36
+\.
+
+
+--
+-- TOC entry 3439 (class 0 OID 43841)
+-- Dependencies: 228
+-- Data for Name: cmp_wsp_out; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.cmp_wsp_out (row_id, calc_date, recording_date, its, technical_condition, recommended_effect, state) FROM stdin;
+260	2022-07-11 15:03:02	2022-07-11 15:03:02	45.0076	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+261	2022-07-11 15:03:05	2022-07-11 15:03:05	25.5062	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+262	2022-07-11 15:03:09	2022-07-11 15:03:09	45.2856	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+263	2022-07-11 15:03:12	2022-07-11 15:03:12	49.9533	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+264	2022-07-11 19:39:35	2022-07-11 19:39:35	72.4500	хорошее	По результатам планового диагностирования	1
+265	2022-07-11 19:39:35	2022-07-11 19:39:35	54.1590	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+266	2022-07-11 19:39:36	2022-07-11 19:39:36	50.3986	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+267	2022-07-11 19:39:36	2022-07-11 19:39:36	76.8010	хорошее	По результатам планового диагностирования	1
+268	2022-07-11 19:39:36	2022-07-11 19:39:36	64.3677	удовлетворительное	Усиленный контроль технического состояния, капитальный ремонт, реконструкция	2
+269	2022-07-11 19:39:42	2022-07-11 19:39:42	44.5951	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+270	2022-07-11 19:39:42	2022-07-11 19:39:42	41.1889	неудовлетворительное	Дополнительное техническое обслуживание и ремонт, усиленный контроль технического состояния, техническое перевооружение	3
+\.
+
+
+--
+-- TOC entry 3420 (class 0 OID 35635)
+-- Dependencies: 209
+-- Data for Name: condenser_in; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.condenser_in (row_id, date, consumption_steam, consumption_water, temperature_entry, diameter_outside, diameter_inside, number_of_water_strokes, water_speed, square, tube_length, saturation_temperature) FROM stdin;
+260	2022-07-11 15:03:00	332.3780	15847.5736	15.7056	28.2810	26.6569	2	2.1752	35337.9285	18.2931	34.9170
+261	2022-07-11 15:03:03	310.9304	16030.5707	15.4265	28.1739	26.0019	2	2.1274	36608.5337	19.0113	34.0507
+262	2022-07-11 15:03:06	309.3997	15404.6316	14.8976	28.7697	26.4327	2	2.1488	37451.4719	18.7103	34.7745
+263	2022-07-11 15:03:09	311.1128	15758.1622	15.7092	27.0373	25.0867	2	2.1132	35308.8456	19.0799	35.7153
+264	2022-07-11 19:39:31	327.8285	15384.5901	15.5376	28.5674	26.5620	2	2.0825	35497.9743	17.9959	36.0512
+265	2022-07-11 19:39:32	322.9231	15875.0448	14.4336	28.5491	26.0018	2	2.0981	34747.0776	18.7719	34.2946
+266	2022-07-11 19:39:33	320.6895	15246.9644	14.4552	29.0037	27.2932	2	2.0747	34660.0786	18.4228	34.2799
+267	2022-07-11 19:39:34	320.0891	15256.2978	14.6444	28.9894	25.5020	2	2.0604	35289.4744	19.0170	33.5647
+268	2022-07-11 19:39:34	308.1945	15892.1487	14.2698	29.0169	26.3342	2	2.1536	35162.3549	17.3988	34.4992
+269	2022-07-11 19:39:35	318.6314	15236.3511	14.8360	27.7432	26.5331	2	2.0041	34687.7843	18.1882	35.0695
+270	2022-07-11 19:39:36	311.3459	15585.2141	14.4652	27.4490	25.5747	2	2.1824	36198.4430	18.5173	35.5526
+\.
+
+
+--
+-- TOC entry 3422 (class 0 OID 35639)
+-- Dependencies: 211
+-- Data for Name: condenser_out; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.condenser_out (row_id, calc_date, recording_date, water_temperature, saturation_temperature, hydraulic_resistance, heat_transfer) FROM stdin;
+260	2022-07-11 15:23:46	2022-07-11 15:23:46	27.8684	3576.7789	29.9987	91608.1617
+261	2022-07-11 15:23:46	2022-07-11 15:23:46	26.6878	3391.7950	28.7923	92747.5313
+262	2022-07-11 15:23:47	2022-07-11 15:23:47	26.5619	3340.7270	28.5231	92137.6185
+263	2022-07-11 15:23:47	2022-07-11 15:23:47	27.1664	3471.3611	29.2879	94728.8249
+264	2022-07-11 19:39:37	2022-07-11 19:39:37	27.8932	3395.3533	30.1450	83852.2759
+265	2022-07-11 19:39:37	2022-07-11 19:39:37	26.2423	3226.4662	28.9292	89833.3067
+266	2022-07-11 19:39:37	2022-07-11 19:39:37	26.6655	3428.5011	28.9164	83086.1504
+267	2022-07-11 19:39:38	2022-07-11 19:39:38	26.8148	2982.4684	29.7203	89120.1220
+268	2022-07-11 19:39:38	2022-07-11 19:39:38	25.5374	3220.2490	28.0544	88389.5515
+269	2022-07-11 19:39:38	2022-07-11 19:39:38	26.9750	3559.6883	29.0262	79090.9695
+270	2022-07-11 19:39:39	2022-07-11 19:39:39	26.0725	3499.1906	28.0212	97088.2626
+\.
+
+
+--
+-- TOC entry 3424 (class 0 OID 35644)
+-- Dependencies: 213
+-- Data for Name: lph_in; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.lph_in (row_id, date, steam_pressure, outer_diameter, condensate_flow_rate, internal_diameter, condensate_temperature, water_passes, length_tube, number_tubes, heating_area, heat_conductivity) FROM stdin;
+260	2022-07-11 15:02:59.5	0.9525	1.0330	1.0004	1.0373	1.0370	0.9939	1.0409	0.9874	1.0338	1.0275
+261	2022-07-11 15:03:03.3	0.9748	1.0192	1.0128	1.0407	0.9861	0.9928	1.0475	0.9773	1.0362	0.9531
+262	2022-07-11 15:03:06.3	0.9592	1.0175	1.0422	0.9899	0.9722	0.9668	1.0487	0.9646	0.9594	0.9536
+263	2022-07-11 15:03:09.5	0.9622	0.9600	0.9653	0.9893	1.0341	1.0367	0.9533	0.9960	0.9661	0.9982
+264	2022-07-11 19:39:31.4	1.0134	1.0144	1.0099	0.9743	0.9797	1.0290	0.9976	1.0106	0.9585	1.0046
+265	2022-07-11 19:39:32.2	0.9837	1.0041	0.9836	0.9712	0.9840	1.0115	0.9831	0.9763	1.0487	1.0312
+266	2022-07-11 19:39:32.9	1.0057	1.0315	1.0362	0.9685	1.0054	0.9813	1.0026	1.0294	1.0179	1.0197
+267	2022-07-11 19:39:33.7	0.9722	0.9516	0.9752	0.9971	1.0328	0.9745	1.0021	1.0116	1.0418	1.0449
+268	2022-07-11 19:39:34.3	1.0347	0.9979	1.0062	1.0052	0.9852	0.9647	1.0101	1.0166	1.0079	0.9523
+269	2022-07-11 19:39:35.1	1.0457	1.0399	0.9859	1.0046	1.0322	0.9966	0.9933	1.0103	1.0389	0.9933
+270	2022-07-11 19:39:35.6	1.0452	0.9879	1.0456	1.0356	1.0401	1.0196	0.9625	0.9675	0.9624	0.9569
+\.
+
+
+--
+-- TOC entry 3426 (class 0 OID 35648)
+-- Dependencies: 215
+-- Data for Name: lph_out; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.lph_out (row_id, calc_date, recording_date, heat_transfer_coefficient, underheating_condensate, condensate_outlet_temperature) FROM stdin;
+260	2022-07-12 21:44:07.9	2022-07-12 21:44:07.9	1.0000	1.0000	1.0000
+261	2022-07-12 21:44:08.1	2022-07-12 21:44:08.1	1.0000	1.0000	1.0000
+262	2022-07-12 21:44:08.3	2022-07-12 21:44:08.3	1.0000	1.0000	1.0000
+263	2022-07-12 21:44:08.5	2022-07-12 21:44:08.6	1.0000	1.0000	1.0000
+264	2022-07-12 21:44:08.8	2022-07-12 21:44:08.8	1.0000	1.0000	1.0000
+265	2022-07-12 21:44:09	2022-07-12 21:44:09	1.0000	1.0000	1.0000
+266	2022-07-12 21:44:09.2	2022-07-12 21:44:09.2	1.0000	1.0000	1.0000
+267	2022-07-12 21:44:09.4	2022-07-12 21:44:09.4	1.0000	1.0000	1.0000
+268	2022-07-12 21:44:09.6	2022-07-12 21:44:09.6	1.0000	1.0000	1.0000
+269	2022-07-12 21:44:09.9	2022-07-12 21:44:09.9	1.0000	1.0000	1.0000
+270	2022-07-12 21:44:10.1	2022-07-12 21:44:10.1	1.0000	1.0000	1.0000
+\.
+
+
+--
+-- TOC entry 3428 (class 0 OID 35653)
+-- Dependencies: 217
+-- Data for Name: turbine_in; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.turbine_in (row_id, date, temperature_entry, pressure_entry, consumption_entry, pressure_out, efficiency, number_of_selections, selection_pressure, sampling_flow) FROM stdin;
+260	2022-07-11 15:03:00	123.6967	2.6074	497.2308	0.2419	0.9101	1	1.4691	6.0431
+261	2022-07-11 15:03:03	121.5324	2.5106	521.5087	0.2297	0.9571	1	1.4523	5.8247
+262	2022-07-11 15:03:06	116.9736	2.5027	488.7690	0.2506	0.9199	1	1.4481	5.8545
+263	2022-07-11 15:03:09	119.3334	2.3768	503.0198	0.2411	0.9795	1	1.3352	5.7795
+264	2022-07-11 19:39:31	122.9984	2.4922	475.7814	0.2415	0.9357	1	1.4522	5.7400
+265	2022-07-11 19:39:32	119.6629	2.4914	513.8659	0.2284	0.9806	1	1.3422	6.1779
+266	2022-07-11 19:39:33	115.2720	2.4785	513.1217	0.2302	0.9735	1	1.3731	6.1333
+267	2022-07-11 19:39:34	124.0588	2.5480	501.2768	0.2390	0.9483	1	1.4116	5.7068
+268	2022-07-11 19:39:34	124.8635	2.4131	487.7430	0.2430	0.9227	1	1.4341	5.8956
+269	2022-07-11 19:39:35	115.4342	2.5279	498.7431	0.2316	0.9418	1	1.4007	6.0301
+270	2022-07-11 19:39:36	121.7445	2.5981	513.7691	0.2373	0.9647	1	1.3838	5.9770
+\.
+
+
+--
+-- TOC entry 3430 (class 0 OID 35657)
+-- Dependencies: 219
+-- Data for Name: turbine_out; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.turbine_out (row_id, calc_date, recording_date, enthalpy_before, entropy_before, enthalpy_after, entropy_after, steam_temperature, enthalpy_1, steam_temperature_1) FROM stdin;
+260	2022-07-11 15:03:02	2022-07-11 15:03:02	3455.2190	7.2970	2871.1590	7.4220	474.3000	3181.3300	634.1000
+261	2022-07-11 15:03:05	2022-07-11 15:03:05	3510.4250	7.3840	2871.2100	7.4460	474.1000	3222.7910	653.6000
+262	2022-07-11 15:03:09	2022-07-11 15:03:09	3437.5550	7.2920	2868.1940	7.4000	473.1000	3174.3820	630.8000
+263	2022-07-11 15:03:12	2022-07-11 15:03:12	3470.6570	7.3580	2853.7330	7.3870	465.7000	3198.9770	642.4000
+264	2022-07-11 19:39:35	2022-07-11 19:39:35	3408.7940	7.2560	2834.6020	7.3440	456.4000	3147.2040	618.0000
+265	2022-07-11 19:39:35	2022-07-11 19:39:35	3493.5740	7.3660	2846.0210	7.3950	461.6000	3204.1300	644.8000
+266	2022-07-11 19:39:35	2022-07-11 19:39:35	3492.0500	7.3670	2852.4400	7.4050	464.8000	3206.4460	645.9000
+267	2022-07-11 19:39:36	2022-07-11 19:39:36	3464.9000	7.3200	2854.5770	7.3920	466.1000	3183.9350	635.3000
+268	2022-07-11 19:39:36	2022-07-11 19:39:36	3436.3080	7.3070	2866.7270	7.4110	472.2000	3182.0090	634.4000
+269	2022-07-11 19:39:42	2022-07-11 19:39:42	3459.4770	7.3160	2850.9690	7.3990	464.1000	3183.5170	635.1000
+270	2022-07-11 19:39:42	2022-07-11 19:39:42	3492.2350	7.3460	2855.0130	7.3970	466.3000	3196.0140	641.0000
+\.
+
+
+--
+-- TOC entry 3467 (class 0 OID 0)
+-- Dependencies: 229
+-- Name: cmp_lph_in_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cmp_lph_in_row_id_seq', 1, false);
+
+
+--
+-- TOC entry 3468 (class 0 OID 0)
+-- Dependencies: 231
+-- Name: cmp_lph_out_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cmp_lph_out_row_id_seq', 1, false);
+
+
+--
+-- TOC entry 3469 (class 0 OID 0)
+-- Dependencies: 225
+-- Name: cmp_wsp_in_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cmp_wsp_in_row_id_seq', 1, false);
+
+
+--
+-- TOC entry 3470 (class 0 OID 0)
+-- Dependencies: 227
+-- Name: cmp_wsp_out_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.cmp_wsp_out_row_id_seq', 1, false);
+
+
+--
+-- TOC entry 3471 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: compare_model_cond_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.compare_model_cond_row_id_seq', 1, false);
+
+
+--
+-- TOC entry 3472 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: compare_model_out_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.compare_model_out_row_id_seq', 1, false);
+
+
+--
+-- TOC entry 3473 (class 0 OID 0)
+-- Dependencies: 210
+-- Name: condenser_in_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.condenser_in_row_id_seq', 270, true);
+
+
+--
+-- TOC entry 3474 (class 0 OID 0)
+-- Dependencies: 212
+-- Name: condenser_out_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.condenser_out_row_id_seq', 14, true);
+
+
+--
+-- TOC entry 3475 (class 0 OID 0)
+-- Dependencies: 214
+-- Name: lph_in_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.lph_in_row_id_seq', 2, true);
+
+
+--
+-- TOC entry 3476 (class 0 OID 0)
+-- Dependencies: 216
+-- Name: lph_out_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.lph_out_row_id_seq', 27, true);
+
+
+--
+-- TOC entry 3477 (class 0 OID 0)
+-- Dependencies: 218
+-- Name: turbine_in_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.turbine_in_row_id_seq', 5, true);
+
+
+--
+-- TOC entry 3478 (class 0 OID 0)
+-- Dependencies: 220
+-- Name: turbine_out_row_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
+--
+
+SELECT pg_catalog.setval('public.turbine_out_row_id_seq', 14, true);
+
+
+--
+-- TOC entry 3267 (class 2606 OID 43869)
+-- Name: cmp_lph_in cmp_lph_in_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_lph_in
+    ADD CONSTRAINT cmp_lph_in_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3269 (class 2606 OID 43884)
+-- Name: cmp_lph_out cmp_lph_out_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_lph_out
+    ADD CONSTRAINT cmp_lph_out_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3263 (class 2606 OID 43834)
+-- Name: cmp_wsp_in cmp_wsp_in_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_wsp_in
+    ADD CONSTRAINT cmp_wsp_in_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3265 (class 2606 OID 43846)
+-- Name: cmp_wsp_out cmp_wsp_out_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_wsp_out
+    ADD CONSTRAINT cmp_wsp_out_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3259 (class 2606 OID 35715)
+-- Name: cmp_cond_in compare_model_cond_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_cond_in
+    ADD CONSTRAINT compare_model_cond_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3261 (class 2606 OID 35747)
+-- Name: cmp_cond_out compare_model_out_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_cond_out
+    ADD CONSTRAINT compare_model_out_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3247 (class 2606 OID 35670)
+-- Name: condenser_in condenser_in_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.condenser_in
+    ADD CONSTRAINT condenser_in_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3249 (class 2606 OID 35672)
+-- Name: condenser_out condenser_out_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.condenser_out
+    ADD CONSTRAINT condenser_out_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3251 (class 2606 OID 35674)
+-- Name: lph_in lph_in_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lph_in
+    ADD CONSTRAINT lph_in_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3253 (class 2606 OID 35676)
+-- Name: lph_out lph_out_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lph_out
+    ADD CONSTRAINT lph_out_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3255 (class 2606 OID 35678)
+-- Name: turbine_in turbine_in_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.turbine_in
+    ADD CONSTRAINT turbine_in_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3257 (class 2606 OID 35680)
+-- Name: turbine_out turbine_out_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.turbine_out
+    ADD CONSTRAINT turbine_out_pkey PRIMARY KEY (row_id);
+
+
+--
+-- TOC entry 3280 (class 2606 OID 43885)
+-- Name: cmp_lph_out cmp_lph_out_row_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_lph_out
+    ADD CONSTRAINT cmp_lph_out_row_id_fkey FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id) ON UPDATE CASCADE;
+
+
+--
+-- TOC entry 3277 (class 2606 OID 43835)
+-- Name: cmp_wsp_in cmp_wsp_in_row_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_wsp_in
+    ADD CONSTRAINT cmp_wsp_in_row_id_fkey FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id) ON UPDATE CASCADE NOT VALID;
+
+
+--
+-- TOC entry 3278 (class 2606 OID 43847)
+-- Name: cmp_wsp_out cmp_wsp_out_row_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_wsp_out
+    ADD CONSTRAINT cmp_wsp_out_row_id_fkey FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id) ON UPDATE CASCADE;
+
+
+--
+-- TOC entry 3275 (class 2606 OID 35716)
+-- Name: cmp_cond_in compare_model_cond_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_cond_in
+    ADD CONSTRAINT compare_model_cond_fk FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id) ON UPDATE CASCADE NOT VALID;
+
+
+--
+-- TOC entry 3276 (class 2606 OID 35748)
+-- Name: cmp_cond_out compare_model_out_row_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_cond_out
+    ADD CONSTRAINT compare_model_out_row_id_fkey FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id) ON UPDATE CASCADE;
+
+
+--
+-- TOC entry 3270 (class 2606 OID 35681)
+-- Name: condenser_out row_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.condenser_out
+    ADD CONSTRAINT row_id FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id);
+
+
+--
+-- TOC entry 3271 (class 2606 OID 35686)
+-- Name: lph_in row_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lph_in
+    ADD CONSTRAINT row_id FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id);
+
+
+--
+-- TOC entry 3273 (class 2606 OID 35691)
+-- Name: turbine_in row_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.turbine_in
+    ADD CONSTRAINT row_id FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id);
+
+
+--
+-- TOC entry 3274 (class 2606 OID 35696)
+-- Name: turbine_out row_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.turbine_out
+    ADD CONSTRAINT row_id FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id);
+
+
+--
+-- TOC entry 3272 (class 2606 OID 35701)
+-- Name: lph_out row_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.lph_out
+    ADD CONSTRAINT row_id FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id);
+
+
+--
+-- TOC entry 3279 (class 2606 OID 43870)
+-- Name: cmp_lph_in row_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.cmp_lph_in
+    ADD CONSTRAINT row_id FOREIGN KEY (row_id) REFERENCES public.condenser_in(row_id);
+
+
+-- Completed on 2022-07-19 18:31:01
+
+--
+-- PostgreSQL database dump complete
+--
+
